@@ -27,6 +27,12 @@
 				}
 			}
 		],
+		"variables": {
+			"dataflow_param_fiscalyear": {
+				"type": "String",
+				"defaultValue": "2020"
+			}
+		},
 		"annotations": []
 	}
 }
