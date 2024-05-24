@@ -264,7 +264,10 @@
 								"referenceName": "dataflow_summary",
 								"type": "DataFlowReference",
 								"parameters": {
-									"dataflow_param_fiscalyear": "'2020'"
+									"dataflow_param_fiscalyear": {
+										"value": "@pipeline().parameters.dataflow_param_fiscalyear",
+										"type": "Expression"
+									}
 								},
 								"datasetParameters": {
 									"source1": {},
@@ -284,10 +287,10 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
-				"variables": {
+				"parameters": {
 					"dataflow_param_fiscalyear": {
-						"type": "String",
-						"defaultValue": "2020"
+						"type": "int",
+						"defaultValue": 2020
 					}
 				},
 				"annotations": []
@@ -1143,6 +1146,63 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/dataflow_TitleMaster')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "TitleMaster",
+								"type": "DatasetReference"
+							},
+							"name": "TitleMaster"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "NYC_Payroll_Title_MD",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(output(",
+						"          TitleCode as string,",
+						"          TitleDescription as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> TitleMaster",
+						"TitleMaster sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          TitleCode as string,",
+						"          TitleDescription as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/TitleMaster')]",
+				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Title_MD')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/dataflow_nycpayroll_2020')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -1325,63 +1385,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/dataflow_TitleMaster')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "TitleMaster",
-								"type": "DatasetReference"
-							},
-							"name": "TitleMaster"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "NYC_Payroll_Title_MD",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [],
-					"scriptLines": [
-						"source(output(",
-						"          TitleCode as string,",
-						"          TitleDescription as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> TitleMaster",
-						"TitleMaster sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          TitleCode as string,",
-						"          TitleDescription as string",
-						"     ),",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     truncate:true,",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/TitleMaster')]",
-				"[concat(variables('factoryId'), '/datasets/NYC_Payroll_Title_MD')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/dataflow_summary')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -1429,7 +1432,7 @@
 					],
 					"scriptLines": [
 						"parameters{",
-						"     dataflow_param_fiscalyear as string ('2020')",
+						"     dataflow_param_fiscalyear as integer (2020)",
 						"}",
 						"source(output(",
 						"          FiscalYear as integer,",
@@ -1482,7 +1485,7 @@
 						"     isolationLevel: 'READ_UNCOMMITTED',",
 						"     format: 'table') ~> source2",
 						"source1, source2 union(byName: false)~> union1",
-						"union1 filter(FiscalYear>=2020) ~> filter1",
+						"union1 filter(FiscalYear >= 2020) ~> filter1",
 						"filter1 derive(TotalPaid = RegularGrossPaid + TotalOTPaid+TotalOtherPay) ~> derivedColumn1",
 						"derivedColumn1 aggregate(groupBy(AgencyName,",
 						"          FiscalYear),",

@@ -236,7 +236,10 @@
 								"referenceName": "dataflow_summary",
 								"type": "DataFlowReference",
 								"parameters": {
-									"dataflow_param_fiscalyear": "'2020'"
+									"dataflow_param_fiscalyear": {
+										"value": "@pipeline().parameters.dataflow_param_fiscalyear",
+										"type": "Expression"
+									}
 								},
 								"datasetParameters": {
 									"source1": {},
@@ -256,10 +259,10 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
-				"variables": {
+				"parameters": {
 					"dataflow_param_fiscalyear": {
-						"type": "String",
-						"defaultValue": "2020"
+						"type": "int",
+						"defaultValue": 2020
 					}
 				},
 				"annotations": []
