@@ -201,10 +201,10 @@
 				}
 			}
 		],
-		"variables": {
+		"parameters": {
 			"dataflow_param_fiscalyear": {
-				"type": "String",
-				"defaultValue": "2020"
+				"type": "string",
+				"defaultValue": "'2020'"
 			}
 		},
 		"annotations": []
